@@ -11,7 +11,7 @@ python -m streamlit run app.py
 ```
 | Has Positive Reviews | Has Negative Reviews |
 |---|---|
-|<img width="1919" height="1119" alt="Screenshot 2026-06-03 144135" src="https://github.com/user-attachments/assets/6b8d4ec2-91d1-4aae-b1a7-1845514d9634" />
+|<img width="1919" height="1119" alt="Screenshot 2026-06-03 144135" src="https://github.com/user-attachments/assets/6b8d4ec2-91d1-4aae-b1a7-1845514d9634" /> |
  <img width="1919" height="1109" alt="Screenshot 2026-06-03 144115" src="https://github.com/user-attachments/assets/7b4e6b5b-b63e-4afc-a778-3405b6ee615b" />
  | 
 
