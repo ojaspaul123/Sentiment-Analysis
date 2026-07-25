@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CineFeels — Movie Sentiment Analysis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0d0d0d;
+      --ink2: #3a3a3a;
+      --ink3: #888;
+      --paper: #f7f4ef;
+      --cream: #ede8e0;
+      --gold: #c8973a;
+      --gold-light: #f0d99a;
+      --pos: #2d6a4f;
+      --pos-bg: #d8f3dc;
+      --neg: #9b2335;
+      --neg-bg: #fce4e4;
+      --film: #1a1a2e;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      background: var(--film);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: var(--gold);
+      letter-spacing: 0.02em;
+    }
+
+    .logo span { color: #fff; font-weight: 400; }
+
+    .tagline {
+      font-size: 0.75rem;
+      color: #aaa;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* Film strip decoration */
+    .filmstrip {
+      height: 28px;
+      background: var(--film);
+      background-image:
+        repeating-linear-gradient(90deg,
+          transparent 0px, transparent 18px,
+          #f7f4ef 18px, #f7f4ef 26px
+        );
+      background-size: 44px 100%;
+      opacity: 0.18;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 4rem 2rem 2rem;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      line-height: 1.15;
+      color: var(--ink);
+      max-width: 700px;
+      margin: 0 auto 1.2rem;
+    }
+
+    .hero p {
+      color: var(--ink2);
+      font-size: 1rem;
+      font-weight: 300;
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Main card */
+    .card-wrap {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 40px rgba(0,0,0,0.07);
+      width: 100%;
+      max-width: 680px;
+      padding: 2.5rem;
+      border: 1px solid var(--cream);
+    }
+
+    .input-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink3);
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      height: 160px;
+      padding: 1rem 1.1rem;
+      border: 1.5px solid var(--cream);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.97rem;
+      font-weight: 300;
+      color: var(--ink);
+      background: var(--paper);
+      resize: vertical;
+      transition: border-color 0.2s;
+      line-height: 1.7;
+      outline: none;
+    }
+
+    textarea:focus { border-color: var(--gold); background: #fff; }
+    textarea::placeholder { color: var(--ink3); }
+
+    .char-count {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--ink3);
+      margin-top: 0.4rem;
+    }
+
+    /* Examples */
+    .examples-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .example-chip {
+      font-size: 0.75rem;
+      padding: 5px 12px;
+      border-radius: 99px;
+      border: 1px solid var(--cream);
+      background: var(--paper);
+      color: var(--ink2);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .example-chip:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: #fff;
+    }
+
+    /* Button */
+    .btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--film);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+    }
+
+    .btn:hover { background: #2a2a4a; }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Loading */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 2rem 0 0.5rem;
+      color: var(--ink3);
+      font-size: 0.9rem;
+    }
+
+    .dots span {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      margin: 0 3px;
+      animation: bounce 1s infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: 0.15s; }
+    .dots span:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    /* Result */
+    .result {
+      display: none;
+      margin-top: 2rem;
+      border-top: 1px solid var(--cream);
+      padding-top: 2rem;
+      animation: fadeUp 0.4s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink3);
+      margin-bottom: 0.8rem;
+    }
+
+    .sentiment-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.6rem 1.4rem;
+      border-radius: 99px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .sentiment-badge.positive {
+      background: var(--pos-bg);
+      color: var(--pos);
+    }
+
+    .sentiment-badge.negative {
+      background: var(--neg-bg);
+      color: var(--neg);
+    }
+
+    .sentiment-badge .emoji { font-size: 1.6rem; }
+
+    /* Confidence bar */
+    .conf-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--ink2);
+      margin-bottom: 0.5rem;
+    }
+
+    .conf-track {
+      height: 8px;
+      background: var(--cream);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .conf-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+      width: 0%;
+    }
+
+    .conf-fill.positive { background: var(--pos); }
+    .conf-fill.negative { background: var(--neg); }
+
+    /* Error */
+    .error-msg {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      background: var(--neg-bg);
+      color: var(--neg);
+      border-radius: 8px;
+      font-size: 0.88rem;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--film);
+      color: #555;
+      text-align: center;
+      font-size: 0.75rem;
+      padding: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+
+    footer a { color: var(--gold); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .card { padding: 1.5rem; }
+      header { flex-direction: column; gap: 4px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Cine<span>Feels</span></div>
+  <div class="tagline">IMDb Movie Review Sentiment Analysis</div>
+</header>
+<div class="filmstrip"></div>
+
+<section class="hero">
+  <p class="hero-eyebrow">Powered by CNN · Deep Learning</p>
+  <h1>What does your review really say?</h1>
+  <p>Paste any movie review and our model reads between the lines — trained on 50,000 IMDb reviews.</p>
+</section>
+
+<div class="card-wrap">
+  <div class="card">
+
+    <label class="input-label" for="reviewInput">Your movie review</label>
+    <textarea id="reviewInput" placeholder="e.g. The cinematography was breathtaking but the plot fell completely flat in the third act..."></textarea>
+    <div class="char-count"><span id="charCount">0</span> characters</div>
+
+    <div class="examples-row">
+      <span class="input-label" style="width:100%; margin-bottom:0;">Try an example:</span>
+      <button class="example-chip" onclick="fillExample('pos')">✨ Positive review</button>
+      <button class="example-chip" onclick="fillExample('neg')">💔 Negative review</button>
+      <button class="example-chip" onclick="fillExample('mix')">🤔 Mixed review</button>
+    </div>
+
+    <button class="btn" id="predictBtn" onclick="predict()">Analyse Sentiment →</button>
+
+    <div class="loading" id="loading">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <p style="margin-top:0.6rem;">Reading the review…</p>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="result" id="result">
+      <p class="result-label">Sentiment detected</p>
+      <div class="sentiment-badge" id="badge">
+        <span class="emoji" id="emoji"></span>
+        <span id="sentimentText"></span>
+      </div>
+      <div class="conf-label-row">
+        <span>Confidence</span>
+        <span id="confPct"></span>
+      </div>
+      <div class="conf-track">
+        <div class="conf-fill" id="confFill"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  Built with Flask + Keras · <a href="https://github.com/ojaspaul123/Sentiment-Analysis-System" target="_blank">GitHub ↗</a> · IMDb Dataset · PinnacleLabs
+</footer>
+
+<script>
+  const examples = {
+    pos: "This film is an absolute masterpiece. The performances were outstanding, the direction was flawless, and the story kept me on the edge of my seat from start to finish. One of the best movies I've seen in years!",
+    neg: "What a complete disaster. The script was lazy, the acting was wooden, and the plot made absolutely no sense. I walked out halfway through and demanded a refund. Avoid at all costs.",
+    mix: "The visuals were genuinely stunning and the lead performance was captivating, but the story dragged in the second half and the ending felt rushed and unsatisfying. Worth watching once but not much more."
+  };
+
+  const textarea = document.getElementById('reviewInput');
+  textarea.addEventListener('input', () => {
+    document.getElementById('charCount').textContent = textarea.value.length;
+  });
+
+  function fillExample(type) {
+    textarea.value = examples[type];
+    document.getElementById('charCount').textContent = textarea.value.length;
+    textarea.focus();
+  }
+
+  async function predict() {
+    const review = textarea.value.trim();
+    const btn = document.getElementById('predictBtn');
+    const loading = document.getElementById('loading');
+    const result = document.getElementById('result');
+    const errorMsg = document.getElementById('errorMsg');
+
+    errorMsg.style.display = 'none';
+    result.style.display = 'none';
+
+    if (!review) {
+      errorMsg.textContent = 'Please enter a movie review before analysing.';
+      errorMsg.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    loading.style.display = 'block';
+
+    try {
+      const res = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ review })
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        errorMsg.textContent = data.error;
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      const isPos = data.sentiment === 'Positive';
+      document.getElementById('emoji').textContent = isPos ? '😊' : '😞';
+      document.getElementById('sentimentText').textContent = data.sentiment;
+      document.getElementById('badge').className = 'sentiment-badge ' + (isPos ? 'positive' : 'negative');
+      document.getElementById('confPct').textContent = data.confidence + '%';
+
+      const fill = document.getElementById('confFill');
+      fill.className = 'conf-fill ' + (isPos ? 'positive' : 'negative');
+      fill.style.width = '0%';
+
+      result.style.display = 'block';
+      setTimeout(() => { fill.style.width = data.confidence + '%'; }, 50);
+
+    } catch (err) {
+      errorMsg.textContent = 'Something went wrong. Make sure the Flask server is running.';
+      errorMsg.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      loading.style.display = 'none';
+    }
+  }
+
+  textarea.addEventListener('keydown', e => {
+    if (e.ctrlKey && e.key === 'Enter') predict();
+  });
+</script>
+
+</body>
+</html>
