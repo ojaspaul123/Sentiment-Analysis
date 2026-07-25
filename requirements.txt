@@ -1,6 +1,5 @@
-streamlit
-keras==2.13.0
-tensorflow-cpu==2.13.0
-h5py
-nltk
-numpy
+streamlit==1.28.0
+tensorflow-cpu==2.13.1
+nltk==3.8.1
+numpy==1.24.3
+h5py==3.9.0
