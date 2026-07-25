@@ -103,7 +103,7 @@ jupyter notebook Sentiment_Analysis.ipynb
 cd Sentiment_Review
 streamlit run app.py
 ```
-Open browser at `http://localhost:8501`
+Open browser at `https://sentiment-analysis-system-mocha.vercel.app/`
 
 ---
 
