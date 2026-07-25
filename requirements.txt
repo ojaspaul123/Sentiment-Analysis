@@ -1,0 +1,5 @@
+flask
+keras
+nltk
+numpy
+h5py
